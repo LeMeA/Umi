@@ -41,25 +41,28 @@ class Playlist:
         return True
 
     def download_track(self, track_path):
-        if self.idx == len(self.tracks):
-            self.idx = 0
-        print('Download start')
-        track_name = ""
-        if self.type == 'YANDEX':
-            track = self.tracks[self.idx].fetch_track()
-            track_name = track['title'] + " " + track['artists'][0]['name']
-        elif self.type == 'SPOTIFY':
-            track_name = self.tracks[self.idx]["track"]["name"] + ' ' + self.tracks[self.idx]["track"]["artists"][0]["name"]
+        track_found = False
+        res = None
+        while not track_found:
+            if self.idx == len(self.tracks):
+                self.idx = 0
+            track_name = ""
+            if self.type == 'YANDEX':
+                track = self.tracks[self.idx].fetch_track()
+                track_name = track['title'] + " " + track['artists'][0]['name']
+            elif self.type == 'SPOTIFY':
+                track_name = self.tracks[self.idx]["track"]["name"] + ' ' + self.tracks[self.idx]["track"]["artists"][0]["name"]
 
-        res = VideosSearch(track_name, limit=2).result()
+            res = VideosSearch(track_name, limit=2).result()
+            if len(res['result']) > 0:
+                track_found = True
+            else:
+                self.idx += 1
+
         link = res['result'][0]['link']
         yt = pytube.YouTube(link)
         streams = yt.streams.filter(progressive=True, file_extension='mp4')
-        #i = 0
-        # while i + 1 < len(streams) and streams[i + 1].mime_type == "audio/mp4":
-        #    i += 1
         print('Track found')
-        #streams[i].download(output_path=track_path, filename='track.mp3')
         streams.order_by('resolution').desc().first().download(track_path, 'track.mp3')
         track = self.tracks[self.idx]
         self.idx += 1
