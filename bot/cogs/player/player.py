@@ -14,9 +14,11 @@ class Player:
 
     def download_next(self):
         """Downloads new track from queue or playlist"""
+        print('download_next')
         if self.mode == 'PLAYLIST' and self.f_shuffle:
             self.playlists[self.mode].set_shuffle_track()
         self.cur_track = self.playlists[self.mode].download_track(self.track_path)
+        print('download_next end')
 
     def stop(self):
         """Reset current playlist"""

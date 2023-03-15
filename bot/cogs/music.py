@@ -186,12 +186,17 @@ class Music(commands.Cog):
 
     # Functions
     def after(self, ctx, ret=False):
+        print('[FUNC]: after')
         guild_id = ctx.message.guild.id
         voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if not self.players[guild_id].empty():
+            print('[FUNC] after shuold play')
             voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+            print('Before download')
             self.players[guild_id].download_next()
+            print('before source')
             source = discord.FFmpegPCMAudio(PATH_TO_SERVERS + str(guild_id) + "/track.mp3")
+            print('Source created')
             voice_client.play(source, after=lambda e: self.after(ctx))
             if ret is False:
                 self.send_non_async(self.embed_track(ctx))

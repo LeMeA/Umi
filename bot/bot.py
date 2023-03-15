@@ -14,8 +14,9 @@ class Bot(commands.Bot):
         self.client_id = None
         self._cogs = [p.stem for p in Path(".").glob(PATH_TO_COGS)]
         print(self._cogs)
+        self._prefix = '>'
 
-        super().__init__(command_prefix=self.prefix, case_insensitive=True, intents=discord.Intents.all())
+        super().__init__(command_prefix=self._prefix, case_insensitive=True, intents=discord.Intents.all())
 
     async def setup(self):
         print("Running setup...")
@@ -30,7 +31,7 @@ class Bot(commands.Bot):
     def run(self):
 
         print("Running bot...")
-        super().run(TEST_BOT_TOKEN, reconnect=True)
+        super().run(BOT_TOKEN, reconnect=True)
 
     async def setup_hook(self) -> None:
         print("Running setup_hook...")
@@ -99,9 +100,10 @@ class Bot(commands.Bot):
 
     async def prefix(self, bot, msg):
         # return commands.when_mentioned_or(">")(bot, msg)
-        with open(PATH_TO_PREFIXES, 'r') as file:
-            prefixes = json.load(file)
-        return prefixes[str(msg.guild.id)]
+        # with open(PATH_TO_PREFIXES, 'r') as file:
+        #    prefixes = json.load(file)
+        # return prefixes[str(msg.guild.id)]
+        pass
 
     async def process_commands(self, msg):
         ctx = await self.get_context(msg, cls=commands.Context)

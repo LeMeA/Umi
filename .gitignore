@@ -1,0 +1,6 @@
+/env
+/bot/config.py
+/bot/__pycache__
+/bot/cogs/__pycache/
+/bot/cogs/player/__pycache__/
+/bot/cogs/servers
