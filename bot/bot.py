@@ -72,7 +72,7 @@ class Bot(commands.Bot):
     async def on_resumed(self):
         print("Bot resumed.")
 
-    async def on_disconnect(self, ctx):
+    async def on_disconnect(self):
         self.voice_clients[self.client_id].cleanup()
         print("Bot disconnected.")
 

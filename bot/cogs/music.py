@@ -8,6 +8,7 @@ from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
 from ..config import *
 from .player.player import Player
+from .messages.music_answers import *
 
 
 class PlayQuery(commands.FlagConverter):
@@ -28,12 +29,13 @@ class Music(commands.Cog):
     async def on_ready(self):
         print('Cog Music is ready!')
 
+
     # Commands
     @commands.hybrid_command(name="join", with_app_command=True, description='Connect bot to user voice channel.')
     async def join(self, ctx):
         await ctx.defer(ephemeral=True)
         if ctx.message.author.voice is None:
-            await ctx.send("You are not connected to any channel.")
+            return await embed_connected(ctx, NOT_CONNECTED)
             return False
         voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
 
@@ -45,13 +47,13 @@ class Music(commands.Cog):
             return await ctx.voice_client.move_to(ctx.message.author.voice.channel)
         elif voice_client is not None and voice_client.is_playing() is True \
                 and voice_client.channel != ctx.message.author.voice.channel:
-            return await ctx.send("Already playing in another channel.")
+            return await embed_connected(ctx, ALREADY_PLAYING)
 
         self.create_folder(ctx.message.guild.id)
         self.players[ctx.message.guild.id] = Player(ctx.message.guild.id)
         channel = ctx.message.author.voice.channel
         await channel.connect(self_deaf=True)
-        return await ctx.send("Connected. Let's start Disco.")
+        return await embed_connected(ctx, CONNECTED)
 
     @commands.hybrid_command(name="leave", with_app_command=True, description='Disconnect bot to user voice channel.')
     async def leave(self, ctx):
@@ -60,9 +62,9 @@ class Music(commands.Cog):
         if voice_client is not None:
             await voice_client.disconnect()
             voice_client.cleanup()
-            return await ctx.send("Disconnected.")
+            return await embed_disconnected(ctx, DISCONNECTED)
         else:
-            return await ctx.send("Bot not connected.")
+            return await embed_disconnected(ctx, NOT_CONNECTED)
 
     @commands.hybrid_command(name="play", with_app_command=True, description='Add track to queue and start Disco.')
     @app_commands.describe(
@@ -71,7 +73,7 @@ class Music(commands.Cog):
     async def play(self, ctx, *, query: str):
         await ctx.defer(ephemeral=True)
         if len(query) == 0:
-            return await ctx.send("No query track.")
+            return await embed_connected(ctx, NO_QUERY)
 
         voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if voice_client is None or voice_client.is_connected() is False:
@@ -88,10 +90,10 @@ class Music(commands.Cog):
 
 
         if self.players[ctx.message.guild.id].add_to_queue(query) is False:
-            return await ctx.send("Can't find track with this query.")
+            return await embed_connected(ctx, BAD_QUAEY)
         if not voice_client.is_playing():
             self.after(ctx, ret=True)
-            await self.embed_track(ctx)
+            await embed_track(ctx, self.players[ctx.message.guild.id])
 
     @commands.hybrid_command(name="playlist", with_app_command=True, description='Starts Disco with queried playlist.')
     @app_commands.describe(
@@ -118,7 +120,7 @@ class Music(commands.Cog):
         if self.players[ctx.message.guild.id].set_playlist(link, self.client) is False:
             return await ctx.send("Playlist url is invalid.")
         self.after(ctx, ret=True)
-        await self.embed_track(ctx)
+        await embed_track(ctx, self.players[ctx.message.guild.id])
 
     @commands.hybrid_command(name="stop", with_app_command=True, description='Stop any Disco.')
     async def stop(self, ctx):
@@ -186,60 +188,24 @@ class Music(commands.Cog):
 
     # Functions
     def after(self, ctx, ret=False):
-        print('[FUNC]: after')
         guild_id = ctx.message.guild.id
         voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if not self.players[guild_id].empty():
-            print('[FUNC] after shuold play')
             voice_client: discord.VoiceClient = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-            print('Before download')
             self.players[guild_id].download_next()
-            print('before source')
             source = discord.FFmpegPCMAudio(PATH_TO_SERVERS + str(guild_id) + "/track.mp3")
-            print('Source created')
             voice_client.play(source, after=lambda e: self.after(ctx))
             if ret is False:
-                self.send_non_async(self.embed_track(ctx))
+                send_non_async(embed_track(ctx, self.players[guild_id]), self.bot.loop)
         else:
             pass
 
-    def send_non_async(self, msg):
-        asyncio.run_coroutine_threadsafe(msg, self.bot.loop)
 
     def create_folder(self, guild_id):
         if not os.path.exists(PATH_TO_SERVERS + str(guild_id)):
             os.mkdir(PATH_TO_SERVERS + str(guild_id))
             print(f"Folder for {guild_id} created.")
 
-    async def embed_track(self, ctx):
-        guild_id = ctx.message.guild.id
-        embed = discord.Embed(
-            title=self.players[guild_id].track_title(),
-            # url="",
-            # description="Here are some ways to format text",track_artist_cover
-            color=discord.Color.red())
-        embed.set_author(name='Umi Bot',
-                         icon_url='https://i.ibb.co/XFp2CGm/umi.png')
-        embed.set_thumbnail(url=self.players[guild_id].track_cover())
-        await ctx.send(embed=embed)
-
-    async def embed_commands(self, ctx):
-        embed = discord.Embed(
-            title='COMMANDS',
-            # url="",
-            description="Available bot commands",
-            color=discord.Color.red())
-        embed.add_field(name=">commands", value="Show available bot commands.", inline=False)
-        embed.add_field(name=">play", value="Find track for queue.", inline=False)
-        embed.add_field(name=">join", value="Join voice channel.", inline=False)
-        embed.add_field(name=">leave", value="Leave voice channel.", inline=False)
-        embed.add_field(name=">stop", value="Stop current queue/playlist.", inline=False)
-        embed.add_field(name=">playlist", value="Find playlist by url.", inline=False)
-        embed.add_field(name=">skip", value="Skip track.", inline=False)
-        embed.add_field(name=">resume", value="Resume paused track.", inline=False)
-        embed.add_field(name=">pause", value="Pause playing track.", inline=False)
-        embed.add_field(name=">shuffle", value="Shuffle tracks in playlist.", inline=False)
-        await ctx.send(embed=embed)
 
 
 async def setup(bot):
