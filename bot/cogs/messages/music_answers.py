@@ -16,7 +16,7 @@ async def embed_track(ctx, player):
         # description="Here are some ways to format text",track_artist_cover
         color=discord.Color.red())
     embed.set_author(name='Umi Bot',
-                     icon_url='https://i.ibb.co/XFp2CGm/umi.png')
+                     icon_url='https://i.ibb.co/4STnGZs/umi.png')
     embed.set_thumbnail(url=player.track_cover())
     await ctx.send(embed=embed)
 
@@ -33,7 +33,7 @@ async def embed_connected(ctx, type: int):
         # description="Here are some ways to format text",track_artist_cover
         color=discord.Color.red())
     embed.set_author(name='Umi Bot',
-                     icon_url='https://i.ibb.co/XFp2CGm/umi.png')
+                     icon_url='https://i.ibb.co/4STnGZs/umi.png')
     await ctx.send(embed=embed)
 
 
@@ -48,7 +48,7 @@ async def embed_disconnected(ctx, type: int):
         # description="Here are some ways to format text",track_artist_cover
         color=discord.Color.red())
     embed.set_author(name='Umi Bot',
-                     icon_url='https://i.ibb.co/XFp2CGm/umi.png')
+                     icon_url='https://i.ibb.co/4STnGZs/umi.png')
     await ctx.send(embed=embed)
 
 
@@ -63,7 +63,7 @@ async def embed_query(ctx, type: int):
         # description="Here are some ways to format text",track_artist_cover
         color=discord.Color.red())
     embed.set_author(name='Umi Bot',
-                     icon_url='https://i.ibb.co/XFp2CGm/umi.png')
+                     icon_url='https://i.ibb.co/4STnGZs/umi.png')
     await ctx.send(embed=embed)
 
 

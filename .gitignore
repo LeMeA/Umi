@@ -4,3 +4,6 @@
 /bot/cogs/__pycache__/
 /bot/cogs/player/__pycache__/
 /bot/cogs/servers
+/bot/cogs/levels.db
+bot/cogs/messages/__pycache__/
+ffmpeg.exe
