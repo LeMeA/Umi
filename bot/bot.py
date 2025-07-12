@@ -1,4 +1,5 @@
 import discord
+
 from discord.ext import commands
 
 
@@ -7,6 +8,7 @@ class Bot(commands.Bot):
         super().__init__(command_prefix='>', case_insensitive=True, intents=discord.Intents.all())
 
     async def setup_hook(self):
-        with open('cogs/enabled_cogs.txt', 'r') as enabled_cogs:
+        with open('bot/cogs/enabled_cogs.txt', 'r') as enabled_cogs:
             for cog_name in enabled_cogs.readlines():
-                await self.load_extension(f'bot.cogs.{cog_name}')
+                await self.load_extension(f'bot.cogs.{cog_name.strip('\n')}')
+        await self.tree.sync()

@@ -1,6 +1,6 @@
-from bot.bot import Bot
-
 import os
+
+from bot.bot import Bot
 from dotenv import load_dotenv
 
 def main():

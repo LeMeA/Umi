@@ -5,9 +5,9 @@ class PingPong(commands.Cog):
     def __init__(self):
         pass
 
-    @commands.hybrid_command(name='ping', with_app_command=True, description='Return Pong.')
+    @commands.hybrid_command(name='ping', with_app_command=True, description='Returns Pong.')
     async def ping(self, ctx: commands.Context):
-        await ctx.send('Pong!')
+        await ctx.send('pong')
 
 async def setup(bot):
-    await bot.add_cog(PingPong(bot))
+    await bot.add_cog(PingPong())
