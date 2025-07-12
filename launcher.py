@@ -1,11 +1,13 @@
+import os
+
 from bot.bot import Bot
-import asyncio
+from dotenv import load_dotenv
 
-
-def main() -> None:
+def main():
     bot = Bot()
-    bot.run()
+    bot.run(token=os.getenv('BOT_TOKEN'))
 
 
 if __name__ == "__main__":
+    load_dotenv()
     main()
